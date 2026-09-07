@@ -1,0 +1,302 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true && request.auth.token.adminRole == 'superadmin';
+    }
+
+    // Admins Collection (Restricted to authenticated admins)
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Immutable Admin Audit Logs (Append-Only)
+    match /adminAuditLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false; // Strict immutability
+    }
+
+    // System Announcements
+    match /systemAnnouncements/{annId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // System Feature Flags
+    match /systemFeatureFlags/{flagId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Minor Safeguarding Records
+    match /safeguardingRecords/{recordId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Data Privacy Requests (Law 25 / GDPR)
+    match /dataRequests/{requestId} {
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Verification Requests Queue
+    match /verificationRequests/{reqId} {
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Content Moderation Queue
+    match /moderationItems/{itemId} {
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.authorId == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Subscriptions Management
+    match /subscriptions/{subId} {
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && (isAdmin() || request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Users Collection & Settings Subcollection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+
+      match /settings/{settingId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // Player Profiles Collection & Subcollections
+    match /playerProfiles/{userId} {
+      allow read: if true; // Allow public player profile showcase/discovery
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+
+      match /photos/{photoId} {
+        allow read: if isOwner(userId)
+          || resource.data.visibility == 'public'
+          || (resource.data.visibility == 'recruitersOnly' && isAuthenticated())
+          || isAdmin();
+        allow create, update, delete: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // Recruiter Profiles Collection
+    match /recruiterProfiles/{userId} {
+      allow read: if true; // Allow public recruiter profile discovery
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // Videos Collection
+    match /videos/{videoId} {
+      allow read: if true; // Allow public video showcase
+      allow create: if isAuthenticated() && request.resource.data.playerId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.playerId == request.auth.uid;
+    }
+
+    // Conversations Collection & Subcollection Messages
+    match /conversations/{conversationId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.participantIds;
+      allow update: if isAuthenticated() && request.auth.uid in resource.data.participantIds;
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      }
+    }
+
+    // Saved Players Collection
+    match /savedPlayers/{savedId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.recruiterId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.recruiterId == request.auth.uid;
+    }
+
+    // Trial Invitations Collection
+    match /trialInvitations/{trialId} {
+      allow read: if true; // Allow opportunities to be viewed in feed
+      allow create: if isAuthenticated() && request.resource.data.recruiterId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.recruiterId == request.auth.uid || resource.data.playerId == request.auth.uid
+      );
+    }
+
+    // Follows Collection
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isAuthenticated()
+        && request.resource.data.followerId == request.auth.uid
+        && request.resource.data.followerId != request.resource.data.targetId;
+      allow delete: if isAuthenticated() && resource.data.followerId == request.auth.uid;
+    }
+
+    // Likes Collection
+    match /likes/{likeId} {
+      allow read: if true;
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // Saved Items Collection
+    match /savedItems/{saveId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated()
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated()
+        && resource.data.userId == request.auth.uid;
+    }
+
+    // Recommendation Feedback Collection
+    match /recommendationFeedback/{feedbackId} {
+      allow read, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.recipientId == request.auth.uid;
+      allow create: if isAuthenticated()
+        && request.resource.data.actorId == request.auth.uid
+        && request.resource.data.recipientId != request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.recipientId == request.auth.uid;
+    }
+
+    // Shortlists Collection (Private to Recruiter)
+    match /shortlists/{shortlistId} {
+      allow read, write: if isAuthenticated()
+        && (resource == null || resource.data.recruiterId == request.auth.uid)
+        && (request.resource == null || request.resource.data.recruiterId == request.auth.uid);
+    }
+
+    // Scouting Notes & Tags Collection (Private to Recruiter)
+    match /scoutingNotes/{noteId} {
+      allow read, write: if isAuthenticated()
+        && (resource == null || resource.data.recruiterId == request.auth.uid)
+        && (request.resource == null || request.resource.data.recruiterId == request.auth.uid);
+    }
+
+    // Scouting Pipelines Collection (Private to Recruiter)
+    match /scoutingPipelines/{pipelineId} {
+      allow read, write: if isAuthenticated()
+        && (resource == null || resource.data.recruiterId == request.auth.uid)
+        && (request.resource == null || request.resource.data.recruiterId == request.auth.uid);
+    }
+
+    // Saved Searches Collection (Private to Recruiter)
+    match /savedSearches/{searchId} {
+      allow read, write: if isAuthenticated()
+        && (resource == null || resource.data.recruiterId == request.auth.uid)
+        && (request.resource == null || request.resource.data.recruiterId == request.auth.uid);
+    }
+
+    // Scouting Events Collection (Private to Recruiter)
+    match /scoutingEvents/{eventId} {
+      allow read, write: if isAuthenticated()
+        && (resource == null || resource.data.recruiterId == request.auth.uid)
+        && (request.resource == null || request.resource.data.recruiterId == request.auth.uid);
+    }
+
+    // Player Applications Collection (Recruiter & Player Access)
+    match /playerApplications/{appId} {
+      allow read: if isAuthenticated() && (
+        resource.data.recruiterId == request.auth.uid || resource.data.playerId == request.auth.uid
+      );
+      allow create: if isAuthenticated() && (
+        request.resource.data.recruiterId == request.auth.uid || request.resource.data.playerId == request.auth.uid
+      );
+      allow update, delete: if isAuthenticated() && (
+        resource.data.recruiterId == request.auth.uid || resource.data.playerId == request.auth.uid
+      );
+    }
+
+    // Phase 9: Meetings & Video Call Invitations
+    match /meetings/{meetingId} {
+      allow read, write: if isAuthenticated() && (
+        resource == null ||
+        request.auth.uid == resource.data.hostId ||
+        request.auth.uid == resource.data.inviteeId ||
+        (request.resource != null && (
+          request.auth.uid == request.resource.data.hostId ||
+          request.auth.uid == request.resource.data.inviteeId
+        ))
+      );
+    }
+
+    // Phase 9: Recruiter & Organization Tasks
+    match /tasks/{taskId} {
+      allow read, write: if isAuthenticated() && (
+        resource == null ||
+        request.auth.uid == resource.data.createdBy ||
+        request.auth.uid == resource.data.assigneeId ||
+        (request.resource != null && (
+          request.auth.uid == request.resource.data.createdBy ||
+          request.auth.uid == request.resource.data.assigneeId
+        ))
+      );
+    }
+
+    // Phase 9: Organization Staff Members
+    match /orgMembers/{memberId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Phase 9: Organization Internal Player Comments
+    match /orgComments/{commentId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Phase 9: Organization Activity Log
+    match /orgActivity/{activityId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Phase 9: User Blocking Collection
+    match /blockedUsers/{blockId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isAuthenticated() && (
+        (request.resource != null && request.resource.data.blockerId == request.auth.uid) ||
+        (resource != null && resource.data.blockerId == request.auth.uid)
+      );
+    }
+
+    // Phase 9: User Reports Collection
+    match /reports/{reportId} {
+      allow create: if isAuthenticated() && request.resource.data.reporterId == request.auth.uid;
+      allow read: if isAuthenticated() && resource.data.reporterId == request.auth.uid;
+    }
+
+    // Phase 9: User Presence Collection
+    match /userPresence/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId);
+    }
+  }
+}
+
+

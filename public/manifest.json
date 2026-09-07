@@ -1,0 +1,24 @@
+{
+  "short_name": "SoccerBridge",
+  "name": "SoccerBridge — Canadian Soccer Recruiting Platform",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "display": "standalone",
+  "orientation": "portrait",
+  "categories": ["sports", "recruiting", "social"],
+  "description": "Connecting Canadian soccer players with FIFA-certified agents, recruiters, professional clubs, and universities."
+}

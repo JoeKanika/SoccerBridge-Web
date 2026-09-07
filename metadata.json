@@ -1,0 +1,6 @@
+{
+  "name": "SoccerBridge",
+  "description": "Professional bilingual Canadian soccer recruiting platform connecting players with FIFA-certified agents, recruiters, clubs, and universities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

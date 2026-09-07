@@ -1,0 +1,12 @@
+{
+  "projectId": "soccerbridge",
+  "appId": "1:1064278430276:web:d5bb81f5665ac36acfa211",
+  "apiKey": "AIzaSyCFnvCnzWcFdKOF9rfuBTLdfDVGAzmvADg",
+  "authDomain": "soccerbridge.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-39df9771-15ed-4a07-8424-f739e09696b2",
+  "storageBucket": "soccerbridge.firebasestorage.app",
+  "messagingSenderId": "1064278430276",
+  "measurementId": "",
+  "oAuthClientId": "1064278430276-f03edmlmoj4iu0ng579uvccabgoalqsl.apps.googleusercontent.com",
+  "recaptchaSiteKey": ""
+}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>SoccerBridge — Canadian Soccer Recruiting Platform</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="SoccerBridge — Canadian Soccer Recruiting Platform" />
+    <meta name="description" content="Connecting Canadian soccer players with FIFA-certified agents, recruiters, professional clubs, and universities." />
+    <meta name="keywords" content="soccer recruitment, Canada soccer, FIFA agent, CPL recruiting, U SPORTS soccer, NCAA soccer trials, player scout, soccer CV, highlight video" />
+    <meta name="theme-color" content="#020617" />
+    
+    <!-- PWA & Mobile Web App Capabilities -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SoccerBridge" />
+    <link rel="apple-touch-icon" href="/assets/icon-192.png" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://soccerbridge.ca/" />
+    <meta property="og:title" content="SoccerBridge — Canadian Soccer Recruiting Platform" />
+    <meta property="og:description" content="Connecting Canadian soccer players with FIFA-certified agents, recruiters, professional clubs, and universities." />
+    <meta property="og:image" content="/assets/og-preview.png" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://soccerbridge.ca/" />
+    <meta property="twitter:title" content="SoccerBridge — Canadian Soccer Recruiting Platform" />
+    <meta property="twitter:description" content="Connecting Canadian soccer players with FIFA-certified agents, recruiters, professional clubs, and universities." />
+    <meta property="twitter:image" content="/assets/og-preview.png" />
+    
+    <!-- Accessibility & Preconnects -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body class="bg-[#020617] text-slate-100 antialiased selection:bg-blue-600 selection:text-white min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch((err) => {
+            console.log('SW registration deferred or skipped:', err);
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /messages/
+
+Sitemap: https://soccerbridge.ca/sitemap.xml

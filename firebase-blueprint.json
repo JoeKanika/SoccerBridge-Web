@@ -1,0 +1,114 @@
+{
+  "entities": {
+    "PlayerShortlist": {
+      "title": "Player Shortlist",
+      "description": "Custom recruiter shortlist of players",
+      "type": "object",
+      "properties": {
+        "recruiterId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "playerIds": { "type": "array" }
+      },
+      "required": ["recruiterId", "title"]
+    },
+    "ScoutingNote": {
+      "title": "Scouting Note",
+      "description": "Private recruiter note and tags on a player",
+      "type": "object",
+      "properties": {
+        "recruiterId": { "type": "string" },
+        "playerId": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "tags": { "type": "array" }
+      },
+      "required": ["recruiterId", "playerId", "body"]
+    },
+    "PipelineItem": {
+      "title": "Pipeline Item",
+      "description": "Kanban scouting pipeline stage for a player",
+      "type": "object",
+      "properties": {
+        "recruiterId": { "type": "string" },
+        "playerId": { "type": "string" },
+        "stage": { "type": "string" }
+      },
+      "required": ["recruiterId", "playerId", "stage"]
+    },
+    "SavedSearch": {
+      "title": "Saved Search",
+      "description": "Saved filter query for recruiters",
+      "type": "object",
+      "properties": {
+        "recruiterId": { "type": "string" },
+        "title": { "type": "string" },
+        "filters": { "type": "object" }
+      },
+      "required": ["recruiterId", "title"]
+    },
+    "ScoutingEvent": {
+      "title": "Scouting Event",
+      "description": "Recruitment calendar event",
+      "type": "object",
+      "properties": {
+        "recruiterId": { "type": "string" },
+        "type": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["recruiterId", "title", "date"]
+    }
+  },
+  "firestore": {
+    "/shortlists/{shortlistId}": {
+      "schema": "PlayerShortlist",
+      "description": "Custom recruiter shortlists"
+    },
+    "/scoutingNotes/{noteId}": {
+      "schema": "ScoutingNote",
+      "description": "Private recruiter player evaluation notes"
+    },
+    "/scoutingPipelines/{pipelineId}": {
+      "schema": "PipelineItem",
+      "description": "Scouting kanban pipeline items"
+    },
+    "/savedSearches/{searchId}": {
+      "schema": "SavedSearch",
+      "description": "Saved recruiter search queries"
+    },
+    "/scoutingEvents/{eventId}": {
+      "schema": "ScoutingEvent",
+      "description": "Recruitment calendar events"
+    },
+    "/meetings/{meetingId}": {
+      "schema": "MeetingInvitation",
+      "description": "Direct and organizational meeting invitations"
+    },
+    "/tasks/{taskId}": {
+      "schema": "RecruiterTask",
+      "description": "Recruiter and organization action tasks"
+    },
+    "/orgMembers/{memberId}": {
+      "schema": "OrgMember",
+      "description": "Organization staff members and role permissions"
+    },
+    "/orgComments/{commentId}": {
+      "schema": "OrgComment",
+      "description": "Internal team comments on candidate players"
+    },
+    "/blockedUsers/{blockId}": {
+      "schema": "BlockedUser",
+      "description": "User blocking relationships"
+    },
+    "/reports/{reportId}": {
+      "schema": "UserReport",
+      "description": "Security and moderation user reports"
+    },
+    "/userPresence/{userId}": {
+      "schema": "UserPresence",
+      "description": "Realtime user presence and online status"
+    }
+  }
+}

@@ -1,0 +1,60 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Profile photos: player-images/{userId}/profile/{fileName=**}
+    match /player-images/{userId}/profile/{fileName=**} {
+      allow read: if true;
+
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('(?i)image/.*');
+
+      allow delete: if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    // Gallery photos: player-images/{userId}/gallery/{photoId}/{fileName=**}
+    match /player-images/{userId}/gallery/{photoId}/{fileName=**} {
+      allow read: if true;
+
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('(?i)image/.*');
+
+      allow delete: if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    // Player videos: player-videos/{userId}/{videoId}/{fileName=**}
+    match /player-videos/{userId}/{videoId}/{fileName=**} {
+      allow read: if true;
+
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size <= 100 * 1024 * 1024
+        && request.resource.contentType.matches('(?i)video/.*');
+
+      allow delete: if request.auth != null
+        && request.auth.uid == userId;
+    }
+
+    // Soccer CV documents: player-documents/{userId}/cv/{fileName=**}
+    match /player-documents/{userId}/cv/{fileName=**} {
+      allow read: if true;
+
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size <= 10 * 1024 * 1024
+        && (request.resource.contentType == 'application/pdf' || request.resource.contentType.matches('(?i).*pdf.*'));
+
+      allow delete: if request.auth != null
+        && request.auth.uid == userId;
+    }
+  }
+}
+
+
